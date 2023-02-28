@@ -21,7 +21,7 @@ db = client[config['database']]
 incubator = db[config['collection']]
 
 
-app = Flask(__name__, static_folder='/home/robert/Desktop/nowebApp/static',template_folder='/home/robert/Desktop/nowebApp/templates')
+
 
 # Set the sensor type (DHT22) and the GPIO pin number
 i2c = board.I2C()
