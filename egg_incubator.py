@@ -9,7 +9,7 @@ import adafruit_ahtx0
 from statistics import mean, pstdev
 import numpy as np
 
-with open('/home/robert/Desktop/App/config.json') as config_file:
+with open('/home/robert/Desktop/config.json') as config_file:
     config = json.load(config_file)
 
 start_date = datetime.strptime(config['start_date'], '%Y-%m-%d')
@@ -21,7 +21,7 @@ db = client[config['database']]
 incubator = db[config['collection']]
 
 
-app = Flask(__name__, static_folder='/home/robert/Desktop/App/static',template_folder='/home/robert/Desktop/App/templates')
+app = Flask(__name__, static_folder='/home/robert/Desktop/nowebApp/static',template_folder='/home/robert/Desktop/nowebApp/templates')
 
 # Set the sensor type (DHT22) and the GPIO pin number
 i2c = board.I2C()
