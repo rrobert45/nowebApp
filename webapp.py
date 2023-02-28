@@ -9,6 +9,7 @@ import numpy as np
 with open('config.json') as config_file:
     config = json.load(config_file)
 
+start_date = datetime.strptime(config['start_date'], '%Y-%m-%d')
 
 # Connect to MongoDB
 uri = config['uri']
@@ -16,10 +17,17 @@ client = MongoClient(uri)
 db = client[config['database']]
 incubator = db[config['collection']]
 
+
 app = Flask(__name__, static_folder='static')
+
+def lock_down_and_hatch(start_date):
+    lock_down_date = start_date + timedelta(days=18)
+    hatch_date = start_date + timedelta(days=21)
+    return lock_down_date,hatch_date
 
 @app.route("/")
 def index():
+        lock_down_date,hatch_date = lock_down_and_hatch(start_date)
         cursor = incubator.find().sort("Time", -1)
         historical_data = []
         for data in cursor:
@@ -73,6 +81,8 @@ def get_egg_cycle_statistics(historical_data):
         
     egg_cycle_statistics.sort(key=lambda x: x['Day in Egg Cycle'], reverse=True)
     return egg_cycle_statistics
+
+
 
 if __name__ == "__main__":
 
