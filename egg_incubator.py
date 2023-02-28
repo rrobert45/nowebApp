@@ -66,7 +66,7 @@ def read_and_log_data():
             temperature, humidity = control()
             last_relay_on = eggTurner(day_in_cycle)
             log_data(temperature, humidity, last_relay_on, temperature_relay_status, humidity_relay_status, day_in_cycle)
-            print(f'{date}: temperature = {temperature}     humidity = {humidity}       Day in Cycle = {day_in_cycle}')
+            print(f'{date}: temperature = {temperature}     humidity = {humidity}       Day in Cycle = {day_in_cycle}'  Temperature Relay = {temperature_relay_status} )
             time.sleep(10)
             
         except KeyboardInterrupt:
