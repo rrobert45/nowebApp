@@ -1,15 +1,13 @@
-import time
-import RPi.GPIO as GPIO
-from pymongo import MongoClient
-import pymongo
-from datetime import datetime, timedelta
+
+from flask import Flask, render_template,request, jsonify,redirect 
 import json
-import board
-import adafruit_ahtx0
+from pymongo import MongoClient
 from statistics import mean, pstdev
 import numpy as np
+from datetime import datetime, timedelta
 
-with open('/home/robert/Desktop/config.json') as config_file:
+
+with open('config.json') as config_file:
     config = json.load(config_file)
 
 start_date = datetime.strptime(config['start_date'], '%Y-%m-%d')
@@ -21,153 +19,50 @@ db = client[config['database']]
 incubator = db[config['collection']]
 
 
+app = Flask(__name__, static_folder='static')
 
+def lock_down_and_hatch(start_date):
+    lock_down_date = start_date + timedelta(days=18)
+    hatch_date = start_date + timedelta(days=21)
+    return lock_down_date,hatch_date
 
-# Set the sensor type (DHT22) and the GPIO pin number
-i2c = board.I2C()
-sensor = adafruit_ahtx0.AHTx0(i2c)
+@app.route("/")
+def index():
+    lock_down_date, hatch_date = lock_down_and_hatch(start_date)
+    cursor = incubator.find().sort("Time", -1)
+    historical_data = []
+    for data in cursor:
+        historical_data.append({
+            'Time': data['Time'],
+            'Temperature(F)': data['Temperature(F)'],
+            'Temperature Relay Status': data['Temperature Relay Status'],
+            'Humidity(%)': data['Humidity(%)'],
+            'Humidity Relay Status': data['Humidity Relay Status'],
+            'Last Egg Turn': data['Last Egg Turn'],
+            'Day in Egg Cycle': data['Day in Egg Cycle']
+        })
+        # Get last record and store it as current data
+        if len(historical_data) == 1:
+            current_data = {
+                'temperature': data['Temperature(F)'],
+                'temperature_relay_status': data['Temperature Relay Status'],
+                'humidity': data['Humidity(%)'],
+                'humidity_relay_status': data['Humidity Relay Status'],
+                'last_relay_on': data['Last Egg Turn'],
+                'day_in_cycle': data['Day in Egg Cycle'],
+            }
 
-# Set the relay pin number
-egg_turner_relay_pin = 19
-heat_relay_pin = 21
-humidifier_relay_pin = 20
+    # New function to get statistical information
+    egg_cycle_data = get_egg_cycle_statistics(historical_data)
 
-# Set the interval for logging data and turning on the relay (in seconds)
-log_interval = config['log_interval']
-relay_interval = config['relay_interval']
-roll_interval = config['roll_interval']
-last_relay_on = config['last_relay_on']
-temperature_relay_status = config['temperature_relay_status']
-humidity_relay_status = config['humidity_relay_status']
-day_in_cycle = config['day_in_cycle']
-
-
-# Set the temperature and humidity thresholds
-temperature_threshold = 100
-humidity_threshold = 50
-
-# Initialize the GPIO pins
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(heat_relay_pin, GPIO.OUT)
-GPIO.setup(humidifier_relay_pin, GPIO.OUT)
-GPIO.setup(egg_turner_relay_pin, GPIO.OUT)
-
-
-
-
-def read_and_log_data():
-    global temperature_relay_status
-    global humidity_relay_status
-    day_in_cycle = day(start_date)
-
-    while True:
-        try:
-            date = datetime.now().strftime("%m-%d-%Y %H:%M:%S")
-            temperature, humidity = control()
-            last_relay_on = eggTurner(day_in_cycle)
-            log_data(temperature, humidity, last_relay_on, temperature_relay_status, humidity_relay_status, day_in_cycle)
-            print(f'{date}: temperature = {temperature}     humidity = {humidity}       Day in Cycle = {day_in_cycle}  Temperature Relay = {temperature_relay_status}' )
-            time.sleep(10)
-            
-        except KeyboardInterrupt:
-            break
-        except:
-            print("An error occurred. Retrying in 30 seconds...")
-            time.sleep(30)
-            continue
-    # Clean up the GPIO pins
-    GPIO.cleanup()
-    # Close the MongoDB connection
-    client.close()
-
-def day(start_date):
-    global humidity_threshold
-    current_date = datetime.now()
-    total_days = 21
-    day_in_cycle = (current_date - start_date).days % total_days
-    if day_in_cycle >= 18:
-        humidity_threshold = 75
-    return day_in_cycle
-
-
-
-def control():
-    global temperature_relay_status
-    global humidity_relay_status
-    global temperature_threshold
-    global humidity_threshold
-    temperature, humidity = read_sensor_data()
-    if temperature < temperature_threshold - 1:
-        # Turn on the heat source
-        GPIO.output(heat_relay_pin, GPIO.LOW)
-        if GPIO.input(heat_relay_pin) == 0:
-            temperature_relay_status = "ON"
-    elif temperature > temperature_threshold:
-        # Turn off the heat source
-        GPIO.output(heat_relay_pin, GPIO.HIGH)
-        if GPIO.input(heat_relay_pin) == 1: 
-            temperature_relay_status = "OFF"
-    else:
-        # Do nothing
-        pass
-    if humidity < (humidity_threshold - 5):
-        # Turn on the humidifier
-        GPIO.output(humidifier_relay_pin, GPIO.LOW)
-        if GPIO.input(humidifier_relay_pin) == 0:
-            humidity_relay_status = "ON"
-    else:
-        # Turn off the humidifier
-        GPIO.output(humidifier_relay_pin, GPIO.HIGH)
-        if GPIO.input(humidifier_relay_pin) == 1:
-            humidity_relay_status = "OFF"
-    return temperature, humidity
-
-def read_sensor_data():
-    # Read the humidity and temperature
-    humidity, temperature = sensor.relative_humidity, sensor.temperature
-    if humidity is not None and temperature is not None:
-        temperature = (temperature * 9/5) + 32
-        return round(temperature,1), round(humidity,1)
-    else:
-        print('Failed to read data from sensor')
-        return None, None
-
-def eggTurner(day_in_cycle):
-    global last_relay_on
-    
-    current_time = datetime.now()
-    if day_in_cycle < 18:
-        if last_relay_on is None:
-            last_relay_on = datetime.now()
-        if GPIO.input(egg_turner_relay_pin) == 1:
-            if current_time - last_relay_on >= timedelta(seconds=relay_interval):
-                # Turn on the relay for 2 minutes
-                GPIO.output(egg_turner_relay_pin, GPIO.LOW)
-                last_relay_on = current_time
-        elif GPIO.input(egg_turner_relay_pin) == 0:        
-            if current_time - last_relay_on >= timedelta(seconds=roll_interval):
-                GPIO.output(egg_turner_relay_pin, GPIO.HIGH)
-    return last_relay_on
-
-def log_data(temperature, humidity, last_relay_on, temperature_relay_status, humidity_relay_status, day_in_cycle):
-    # Get the most recent record from the database
-    last_record = incubator.find_one(sort=[('_id', pymongo.DESCENDING)])
-
-    # Check if a record has been stored within the log interval
-    if last_record is None or (datetime.now() - datetime.strptime(last_record['Time'], '%m-%d-%Y %H:%M')).total_seconds() >= log_interval:
-        # Create a data dictionary
-        data = {
-            'Time': time.strftime("%m-%d-%Y %H:%M"),
-            'Temperature(F)': temperature,
-            'Temperature Relay Status': temperature_relay_status,
-            'Humidity(%)': humidity,
-            'Humidity Relay Status': humidity_relay_status,
-            'Last Egg Turn': last_relay_on.strftime("%m-%d-%Y %I:%M %P") if last_relay_on is not None else '',
-            'Day in Egg Cycle': day_in_cycle
-        }
-
-        # Insert the data into the incubator collection
-        incubator.insert_one(data)
+    data = {
+        'historical_data': historical_data,
+        'egg_cycle_data': egg_cycle_data,
+        'lock_down_date': lock_down_date,
+        'hatch_date': hatch_date,
+        'current_data': current_data,  # Add current data to the dictionary
+    }
+    return render_template('index.html', data=data)
 
 def get_egg_cycle_statistics(historical_data):
     egg_cycle_dict = {}
@@ -204,4 +99,7 @@ def get_egg_cycle_statistics(historical_data):
 
 
 if __name__ == "__main__":
-    read_and_log_data()
+
+    app.run(debug=True, host='0.0.0.0', port=5000)
+    
+    input("")
