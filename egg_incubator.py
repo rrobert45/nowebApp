@@ -39,7 +39,7 @@ roll_interval = config['roll_interval']
 last_relay_on = config['last_relay_on']
 temperature_relay_status = config['temperature_relay_status']
 humidity_relay_status = config['humidity_relay_status']
-day_in_cycle = config['day_in_cycle']
+
 
 
 # Set the temperature and humidity thresholds
@@ -80,7 +80,6 @@ def read_and_log_data():
     client.close()
 
 def day(start_date):
-    global day_in_cycle
     global humidity_threshold
     current_date = datetime.now()
     total_days = 21
