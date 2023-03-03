@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+import json
 
 with open('/home/robert/Desktop/config.json') as config_file:
     config = json.load(config_file)
