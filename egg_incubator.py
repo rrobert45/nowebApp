@@ -96,7 +96,7 @@ def control():
     global temperature_threshold
     global humidity_threshold
     temperature, humidity = read_sensor_data()
-    if temperature < temperature_threshold - 1:
+    if temperature < temperature_threshold - .5:
         # Turn on the heat source
         GPIO.output(heat_relay_pin, GPIO.LOW)
         if GPIO.input(heat_relay_pin) == 0:
