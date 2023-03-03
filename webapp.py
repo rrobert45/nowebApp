@@ -54,10 +54,12 @@ def index():
 
     # New function to get statistical information
     egg_cycle_data = get_egg_cycle_statistics(historical_data)
+    egg_cycle_data_hour = get_egg_cycle_statistics_by_hour(historical_data)
 
     data = {
         'historical_data': historical_data,
         'egg_cycle_data': egg_cycle_data,
+        'egg_cycle_data_hour':egg_cycle_data_hour,
         'lock_down_date': lock_down_date.strftime("%m-%d-%Y"),
         'hatch_date': hatch_date.strftime("%m-%d-%Y"),
         'current_data': current_data,  # Add current data to the dictionary
@@ -95,6 +97,51 @@ def get_egg_cycle_statistics(historical_data):
         })
         
     egg_cycle_statistics.sort(key=lambda x: x['Day in Egg Cycle'], reverse=True)
+    return egg_cycle_statistics
+
+
+def get_egg_cycle_statistics_by_hour(historical_data):
+    egg_cycle_dict = {}
+    for data in historical_data:
+        day = data['Day in Egg Cycle']
+        temperature = data['Temperature(F)']
+        humidity = data['Humidity(%)']
+        timestamp = data['Time'].strftime('%Y-%m-%d %H:%M:%S')
+        hour = timestamp.hour
+        if day in egg_cycle_dict:
+            if hour in egg_cycle_dict[day]:
+                egg_cycle_dict[day][hour]['temperature'].append(temperature)
+                egg_cycle_dict[day][hour]['humidity'].append(humidity)
+            else:
+                egg_cycle_dict[day][hour] = {
+                    'temperature': [temperature],
+                    'humidity': [humidity],
+                }
+        else:
+            egg_cycle_dict[day] = {
+                hour: {
+                    'temperature': [temperature],
+                    'humidity': [humidity],
+                }
+            }
+    
+    egg_cycle_statistics = []
+    for day, hours in egg_cycle_dict.items():
+        for hour, values in hours.items():
+            avg_temp = np.mean(values['temperature'])
+            std_temp = np.std(values['temperature'])
+            avg_hum = np.mean(values['humidity'])
+            std_hum = np.std(values['humidity'])
+            egg_cycle_statistics.append({
+                'Day in Egg Cycle': day,
+                'Hour': hour,
+                'Average Temperature (F)': round(avg_temp, 2),
+                'Temperature Standard Deviation': round(std_temp, 2),
+                'Average Humidity (%)': round(avg_hum, 2),
+                'Humidity Standard Deviation': round(std_hum, 2),
+            })
+        
+    egg_cycle_statistics.sort(key=lambda x: (x['Day in Egg Cycle'], x['Hour']), reverse=True)
     return egg_cycle_statistics
 
 
