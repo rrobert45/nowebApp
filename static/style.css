@@ -18,7 +18,7 @@
   --white: #fff;
   --gray: #6c757d;
   --gray-dark: #343a40;
-  --primary: #007bff;
+  --primary: #000000;
   --secondary: #6c757d;
   --success: #28a745;
   --info: #17a2b8;
@@ -5668,13 +5668,13 @@ a.badge:hover {
 
 .badge-primary {
   color: #fff;
-  background-color: #007bff
+  background-color: #000000
 }
 
-a.badge-primary:focus,
+a.badge-gradient-primary:focus,
 a.badge-primary:hover {
   color: #fff;
-  background-color: #0062cc
+  background-color: #000000
 }
 
 a.badge-primary.focus,
