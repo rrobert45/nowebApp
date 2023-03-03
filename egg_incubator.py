@@ -58,11 +58,10 @@ GPIO.setup(egg_turner_relay_pin, GPIO.OUT)
 def read_and_log_data():
     global temperature_relay_status
     global humidity_relay_status
-    day_in_cycle = day(start_date)
-
+    
     while True:
         try:
-            
+            day_in_cycle = day(start_date)
             temperature, humidity = control()
             last_relay_on = eggTurner(day_in_cycle)
             log_data(temperature, humidity, last_relay_on, temperature_relay_status, humidity_relay_status, day_in_cycle)
@@ -81,6 +80,7 @@ def read_and_log_data():
     client.close()
 
 def day(start_date):
+    global day_in_cycle
     global humidity_threshold
     current_date = datetime.now()
     total_days = 21
