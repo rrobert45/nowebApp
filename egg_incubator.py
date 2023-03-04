@@ -6,8 +6,7 @@ from datetime import datetime, timedelta
 import json
 import board
 import adafruit_ahtx0
-from statistics import mean, pstdev
-import numpy as np
+
 
 with open('/home/robert/Desktop/config.json') as config_file:
     config = json.load(config_file)
@@ -35,7 +34,7 @@ humidity_relay_status = config['humidity_relay_status']
 
 
 # Set the temperature and humidity thresholds
-temperature_threshold = 99
+temperature_threshold = 99.5
 humidity_threshold = 50
 
 # Initialize the GPIO pins
@@ -153,8 +152,6 @@ def eggTurner(day_in_cycle):
     return last_relay_on
 
 def log_data(temperature, humidity, last_relay_on, temperature_relay_status, humidity_relay_status, day_in_cycle):
-    # Get the most recent record from the database
-            # Create a data dictionary
     timestamp = datetime.now()
     date = timestamp.strftime("%m-%d-%Y %H:%M:%S")
     try:
