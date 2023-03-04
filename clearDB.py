@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 import json
 
-with open('/home/robert/Desktop/config.json') as config_file:
+with open('config.json') as config_file:
     config = json.load(config_file)
 
 # Connect to MongoDB
