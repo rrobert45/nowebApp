@@ -14,14 +14,6 @@ with open('/home/robert/Desktop/config.json') as config_file:
 
 start_date = datetime.strptime(config['start_date'], '%Y-%m-%d')
 
-# Connect to MongoDB
-uri = config['uri']
-client = MongoClient(uri)
-db = client[config['database']]
-incubator = db[config['collection']]
-
-
-
 
 # Set the sensor type (DHT22) and the GPIO pin number
 i2c = board.I2C()
@@ -43,7 +35,7 @@ humidity_relay_status = config['humidity_relay_status']
 
 
 # Set the temperature and humidity thresholds
-temperature_threshold = 100
+temperature_threshold = 99
 humidity_threshold = 50
 
 # Initialize the GPIO pins
@@ -53,7 +45,14 @@ GPIO.setup(humidifier_relay_pin, GPIO.OUT)
 GPIO.setup(egg_turner_relay_pin, GPIO.OUT)
 
 
+def mongoDB():
+    # Connect to MongoDB
+    uri = config['uri']
+    client = MongoClient(uri)
+    db = client[config['database']]
+    incubator = db[config['collection']]
 
+    return client,incubator
 
 def read_and_log_data():
     global temperature_relay_status
@@ -77,7 +76,7 @@ def read_and_log_data():
     # Clean up the GPIO pins
     GPIO.cleanup()
     # Close the MongoDB connection
-    client.close()
+    
 
 def day(start_date):
     global humidity_threshold
@@ -157,20 +156,27 @@ def log_data(temperature, humidity, last_relay_on, temperature_relay_status, hum
     # Get the most recent record from the database
             # Create a data dictionary
     timestamp = datetime.now()
-    data = {
-        'Timestamp' : timestamp,
-        #'Time': time.strftime("%m-%d-%Y %H:%M"),
-        'Temperature(F)': temperature,
-        'Temperature Relay Status': temperature_relay_status,
-        'Humidity(%)': humidity,
-        'Humidity Relay Status': humidity_relay_status,
-        'Last Egg Turn': last_relay_on.strftime("%m-%d-%Y %I:%M %P") if last_relay_on is not None else '',
-        'Day in Egg Cycle': day_in_cycle
-    }
-    # Insert the data into the incubator collection
-    incubator.insert_one(data)
     date = timestamp.strftime("%m-%d-%Y %H:%M:%S")
-    print(f'{date}: temperature = {temperature}     humidity = {humidity}       Day in Cycle = {day_in_cycle}  Temperature Relay = {temperature_relay_status}' )
+    try:
+        client,incubator = mongoDB()
+        
+        data = {
+            'Timestamp' : timestamp,
+            #'Time': time.strftime("%m-%d-%Y %H:%M"),
+            'Temperature(F)': temperature,
+            'Temperature Relay Status': temperature_relay_status,
+            'Humidity(%)': humidity,
+            'Humidity Relay Status': humidity_relay_status,
+            'Last Egg Turn': last_relay_on.strftime("%m-%d-%Y %I:%M %P") if last_relay_on is not None else '',
+            'Day in Egg Cycle': day_in_cycle
+        }
+        # Insert the data into the incubator collection
+        incubator.insert_one(data)
+        
+        print(f'{date}: temperature = {temperature}     humidity = {humidity}       Day in Cycle = {day_in_cycle}  Temperature Relay = {temperature_relay_status}' )
+        client.close()
+    except:
+        print(f'Data log failed on {date}')
 
 
 

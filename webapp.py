@@ -73,7 +73,7 @@ def historical_data():
     historical_data = []
     for data in cursor:
         historical_data.append({
-            'Time': data['Timestamp'],
+            'Time': data['Timestamp'].strftime('%m-%d-%Y %H:%M'),
             'Temperature(F)': data['Temperature(F)'],
             'Temperature Relay Status': data['Temperature Relay Status'],
             'Humidity(%)': data['Humidity(%)'],
@@ -156,7 +156,7 @@ def get_egg_cycle_statistics_by_hour(historical_data):
             std_hum = np.std(values['humidity'])
             timestamp = datetime.fromtimestamp(hour * 3600)
             egg_cycle_statistics.append({
-                'Time': timestamp.strftime('%m-%d-%Y %H:%M'),
+                'Time': timestamp.strftime('%m-%d-%Y %H:%M %p'),
                 'Average Temperature (F)': round(avg_temp, 2),
                 'Temperature Standard Deviation': round(std_temp, 2),
                 'Average Humidity (%)': round(avg_hum, 2),
