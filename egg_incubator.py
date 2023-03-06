@@ -34,7 +34,7 @@ humidity_relay_status = config['humidity_relay_status']
 
 
 # Set the temperature and humidity thresholds
-temperature_threshold = 99.5
+temperature_threshold = 100
 humidity_threshold = 50
 
 # Initialize the GPIO pins
