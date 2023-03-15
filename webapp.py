@@ -69,7 +69,7 @@ def index():
 
 @app.route('/historical_data')
 def historical_data():
-    cursor = incubator.find().sort("Timestamp", -1)
+    cursor = incubator.find().sort("Timestamp", -1).limit(50)
     historical_data = []
     for data in cursor:
         historical_data.append({

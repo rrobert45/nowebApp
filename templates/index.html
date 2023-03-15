@@ -4,32 +4,24 @@
 <head>
     <title>Incubator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
 </head>
 
 <body class="bg-gradient-primary">
-    
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary bg-gradient-primary">
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Current Data</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/historical_data">Historical Data</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="https://charts.mongodb.com/charts-incubator-ehkxq/dashboards/63fe6f40-4bc6-4961-8274-9b27db69067d">Charts</a>
-                </li>
-            </ul>
-        </div>
+    <nav class="navbar navbar-expand navbar-dark bg-primary bg-gradient-primary">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Current Data</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/historical_data">Historical Data</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"
+                    href="https://charts.mongodb.com/charts-incubator-ehkxq/dashboards/63fe6f40-4bc6-4961-8274-9b27db69067d">Charts</a>
+            </li>
+        </ul>
     </nav>
-
-
-
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
@@ -52,99 +44,101 @@
                                 </tr>
                             </thead>
                             <tbody>
+                              <tr>
+                                <td>{{ data.current_data.temperature }}</td>
+                                <td>{{ data.current_data.temperature_relay_status }}</td>
+                                <td>{{ data.current_data.humidity }}</td>
+                                <td>{{ data.current_data.humidity_relay_status }}</td>
+                                <td>{{ data.current_data.last_relay_on }}</td>
+                                <td>{{ data.current_data.day_in_cycle }}</td>
+                                <td>{{ data.lock_down_date }}</td>
+                                <td>{{ data.hatch_date }}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="container-fluid">
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                          <h4 class="m-0 font-weight-bold text-primary">Statistical Information</h4>
+                        </div>
+                        <div class="card-body">
+                          <table class="table table-bordered">
+                            <thead>
+                              <tr>
+                                <th>Day in Egg Cycle</th>
+                                <th>Average Temperature (F)</th>
+                                <th>Temperature Standard Deviation</th>
+                                <th>Average Humidity (%)</th>
+                                <th>Humidity Standard Deviation</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in data.egg_cycle_data %}
                                 <tr>
-                                    <td>{{ data.current_data.temperature }}</td>
-                                    <td>{{ data.current_data.temperature_relay_status }}</td>
-                                    <td>{{ data.current_data.humidity }}</td>
-                                    <td>{{ data.current_data.humidity_relay_status }}</td>
-                                    <td>{{ data.current_data.last_relay_on }}</td>
-                                    <td>{{ data.current_data.day_in_cycle }}</td>
-                                    <td>{{ data.lock_down_date }}</td>
-                                    <td>{{ data.hatch_date }}</td>
+                                    <td>{{ data["Day in Egg Cycle"] }}</td>
+                                    <td>{{ data["Average Temperature (F)"] }}</td>
+                                    <td>{{ data["Temperature Standard Deviation"] }}</td>
+                                    <td>{{ data["Average Humidity (%)"] }}</td>
+                                    <td>{{ data["Humidity Standard Deviation"] }}</td>
                                 </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                    <h4 class="m-0 font-weight-bold text-primary">Statistical Information</h4>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Day in Egg Cycle</th>
-                                <th>Average Temperature (F)</th>
-                                <th>Temperature Standard Deviation</th>
-                                <th>Average Humidity (%)</th>
-                                <th>Humidity Standard Deviation</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for data in data.egg_cycle_data %}
-                            <tr>
-                                <td>{{ data["Day in Egg Cycle"] }}</td>
-                                <td>{{ data["Average Temperature (F)"] }}</td>
-                                <td>{{ data["Temperature Standard Deviation"] }}</td>
-                                <td>{{ data["Average Humidity (%)"] }}</td>
-                                <td>{{ data["Humidity Standard Deviation"] }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
 
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                    <h4 class="m-0 font-weight-bold text-primary">Statistical Information by the Hour</h4>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Average Temperature (F)</th>
-                                <th>Temperature Standard Deviation</th>
-                                <th>Average Humidity (%)</th>
-                                <th>Humidity Standard Deviation</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for data in data.egg_cycle_data_hour %}
-                            <tr>
-                                <td>{{ data["Time"] }}</td>
-                                <td>{{ data["Average Temperature (F)"] }}</td>
-                                <td>{{ data["Temperature Standard Deviation"] }}</td>
-                                <td>{{ data["Average Humidity (%)"] }}</td>
-                                <td>{{ data["Humidity Standard Deviation"] }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h4 class="m-0 font-weight-bold text-primary">Statistical Information by the Hour</h4>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Average Temperature (F)</th>
+                                        <th>Temperature Standard Deviation</th>
+                                        <th>Average Humidity (%)</th>
+                                        <th>Humidity Standard Deviation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tbody>
+                                        {% for data in data.egg_cycle_data_hour[::-1]|sort(attribute="Time",reverse=True) %}
+                                            {% if loop.index <= 12 %}
+                                            <tr>
+                                                <td>{{ data["Time"] }}</td>
+                                                <td>{{ data["Average Temperature (F)"] }}</td>
+                                                <td>{{ data["Temperature Standard Deviation"] }}</td>
+                                                <td>{{ data["Average Humidity (%)"] }}</td>
+                                                <td>{{ data["Humidity Standard Deviation"] }}</td>
+                                            </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
 
 
-    
+
 </html>
