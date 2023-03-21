@@ -11,7 +11,7 @@ db = client[config['database']]
 incubator = db[config['collection']]
 
 # Clear the incubator collection
-incubator.delete_many({})
+incubator.drop()
 
 # Close the MongoDB connection
 client.close()
