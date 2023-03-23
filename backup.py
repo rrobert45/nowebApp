@@ -32,6 +32,8 @@ async def main():
         # Fetch the latest temperature record from the database
         latest_record = incubator.find().sort("_id", -1).limit(1)[0]
         temperature_f = latest_record['Temperature(F)']
+        printTime= latest_record['Timestamp']
+        
 
         if temperature_f > 102.5:
             # Turn off the plug
@@ -41,7 +43,7 @@ async def main():
             # Turn on the plug
             await turn_on_kasa_smart_plug(smart_plug_ip)
 
-        print(f"Temperature {temperature_f}, waiting 2 mintues.")
+        print(f"{printTime} -- Temperature {temperature_f}")
         await asyncio.sleep(120)  # Wait for 2 minutes before checking again
 
 if __name__ == "__main__":
