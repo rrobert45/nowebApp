@@ -97,31 +97,36 @@ def control():
     if temperature < temperature_threshold:
         # Turn on the heat source
         GPIO.output(heat_relay_pin, GPIO.LOW)
-        if GPIO.input(heat_relay_pin) == 0:
+        if GPIO.input(heat_relay_pin) == GPIO.LOW:
             temperature_relay_status = "ON"
-    elif temperature > temperature_threshold+1:
+    elif temperature > temperature_threshold + 1:
         # Turn off the heat source
         GPIO.output(heat_relay_pin, GPIO.HIGH)
-        if GPIO.input(heat_relay_pin) == 1: 
+        if GPIO.input(heat_relay_pin) == GPIO.HIGH:
             temperature_relay_status = "OFF"
     else:
         # Do nothing
-        if GPIO.input(heat_relay_pin) == 0:
+        if GPIO.input(heat_relay_pin) == GPIO.LOW:
             temperature_relay_status = "ON"
-        if GPIO.input(heat_relay_pin) == 1: 
+        if GPIO.input(heat_relay_pin) == GPIO.HIGH:
             temperature_relay_status = "OFF"
-
 
     if humidity < (humidity_threshold - 5):
         # Turn on the humidifier
         GPIO.output(humidifier_relay_pin, GPIO.LOW)
-        #if GPIO.input(humidifier_relay_pin) == 0:
-        humidity_relay_status = "ON"
+        if GPIO.input(humidifier_relay_pin) == GPIO.LOW:
+            humidity_relay_status = "ON"
     elif humidity > humidity_threshold:
         # Turn off the humidifier
         GPIO.output(humidifier_relay_pin, GPIO.HIGH)
-        #if GPIO.input(humidifier_relay_pin) == 1:
-        humidity_relay_status = "OFF"
+        if GPIO.input(humidifier_relay_pin) == GPIO.HIGH:
+            humidity_relay_status = "OFF"
+    else:
+        # Do nothing
+        if GPIO.input(humidifier_relay_pin) == GPIO.LOW:
+            humidity_relay_status = "ON"
+        if GPIO.input(humidifier_relay_pin) == GPIO.HIGH:
+            humidity_relay_status = "OFF"
 
     return temperature, humidity
 
