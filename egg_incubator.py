@@ -144,7 +144,7 @@ def eggTurner(day_in_cycle):
     global last_relay_on
     
     current_time = datetime.now()
-    if day_in_cycle < 18:
+    if day_in_cycle < 21:
         if last_relay_on is None:
             last_relay_on = datetime.now()
         if GPIO.input(egg_turner_relay_pin) == 1:
