@@ -144,17 +144,18 @@ def eggTurner(day_in_cycle):
     global last_relay_on
     
     current_time = datetime.now()
-    if day_in_cycle < 21:
-        if last_relay_on is None:
-            last_relay_on = datetime.now()
-        if GPIO.input(egg_turner_relay_pin) == 1:
-            if current_time - last_relay_on >= timedelta(seconds=relay_interval):
-                # Turn on the relay for 2 minutes
-                GPIO.output(egg_turner_relay_pin, GPIO.LOW)
-                last_relay_on = current_time
-        elif GPIO.input(egg_turner_relay_pin) == 0:        
-            if current_time - last_relay_on >= timedelta(seconds=roll_interval):
-                GPIO.output(egg_turner_relay_pin, GPIO.HIGH)
+    
+    if last_relay_on is None:
+        last_relay_on = datetime.now()
+    if GPIO.input(egg_turner_relay_pin) == 1:
+        if current_time - last_relay_on >= timedelta(seconds=relay_interval):
+            # Turn on the relay for 2 minutes
+            GPIO.output(egg_turner_relay_pin, GPIO.LOW)
+            last_relay_on = current_time
+    elif GPIO.input(egg_turner_relay_pin) == 0:        
+        if current_time - last_relay_on >= timedelta(seconds=roll_interval):
+            GPIO.output(egg_turner_relay_pin, GPIO.HIGH)
+    
     return last_relay_on
 
 def log_data(temperature, humidity, last_relay_on, temperature_relay_status, humidity_relay_status, day_in_cycle):
